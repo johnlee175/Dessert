@@ -1,0 +1,50 @@
+project.with {
+    afterEvaluate {
+        def variants
+        if (android.hasProperty('libraryVariants')) {
+            variants = android.libraryVariants
+        } else if (android.hasProperty('applicationVariants')) {
+            variants = android.applicationVariants
+        } else {
+            return
+        }
+        variants.all { variant ->
+            def beforeTaskName = "generate${variant.name.capitalize()}Annotations"
+            def afterTaskName = "generate${variant.name.capitalize()}Sources"
+            println ">>>>>>>>>>> $project : $afterTaskName dependsOn $beforeTaskName"
+            tasks.getByName(afterTaskName).dependsOn(tasks.create(name: beforeTaskName, type: JavaCompile) {
+                def jc = variant.javaCompile
+                classpath = jc.classpath
+                destinationDir = jc.destinationDir
+                sourceCompatibility = jc.sourceCompatibility
+                targetCompatibility = jc.targetCompatibility
+                excludes = jc.excludes
+                includes = jc.includes
+                source = jc.source
+                toolChain = jc.toolChain
+
+                def opt = jc.options
+                options.annotationProcessorGeneratedSourcesDirectory = opt.annotationProcessorGeneratedSourcesDirectory
+                options.annotationProcessorPath = opt.annotationProcessorPath
+                options.bootClasspath = opt.bootClasspath
+                options.compilerArgs = new ArrayList<>(opt.compilerArgs)
+                options.debug = opt.debug
+                options.debugOptions = opt.debugOptions
+                options.deprecation = opt.deprecation
+                options.encoding = opt.encoding
+                options.extensionDirs = opt.extensionDirs
+                options.failOnError = opt.failOnError
+                options.fork = opt.fork
+                options.forkOptions = opt.forkOptions
+                options.incremental = opt.incremental
+                options.listFiles = opt.listFiles
+                options.sourcepath = opt.sourcepath
+                options.verbose = opt.verbose
+                options.warnings = opt.warnings
+
+                options.compilerArgs.remove '-proc:none'
+                options.compilerArgs.add '-proc:only'
+            })
+        }
+    }
+}

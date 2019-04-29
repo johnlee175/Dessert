@@ -1,0 +1,15 @@
+apply plugin: 'java-library'
+
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
+
+compileJava {
+    options.annotationProcessorGeneratedSourcesDirectory = file("$projectDir/src/generated/java")
+}
+
+sourceSets.main.java.srcDirs += ["$projectDir/src/generated/java"]
+
+dependencies {
+    compileOnly project(':anno')
+    annotationProcessor project(':apt')
+}
